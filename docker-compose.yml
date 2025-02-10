@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: symfony_app
+    working_dir: /var/www/symfony
+    volumes:
+      - .:/var/www/symfony
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "mysql://root@db:3306/pocteofactory?serverVersion=5.7"
+    ports:
+      - "8080:80"
+    networks:
+      - symfony_network
+
+  db:
+    image: mysql:5.7  
+    container_name: symfony_db
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes" 
+      MYSQL_DATABASE: pocteofactory
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./create_users_table.sql:/docker-entrypoint-initdb.d/create_users_table.sql
+    networks:
+      - symfony_network
+
+networks:
+  symfony_network:
+    driver: bridge
